@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Função de ativação sigmoid
 def sigmoid(x):
@@ -52,14 +53,24 @@ class NeuralNetwork:
             self.weights[i] += self.learning_rate * layer_input.T.dot(delta)
     
     def train(self, X, y):
+        # Lista para armazenar o erro ao longo do treinamento, para plotagem
+        epochs_list = []
+        loss_list = []
+        
         for epoch in range(self.epochs):
             for xi, yi in zip(X, y):
                 activations = self.feedforward(xi)
                 self.backpropagation(activations, yi)
-            # Opcional: Impressão do erro a cada 1000 épocas
+                
+            # Registra o erro a cada 1000 épocas (ou em todas, conforme desejado)
             if epoch % 1000 == 0:
                 loss = np.mean(np.square(y - self.predict(X)))
                 print(f"Época {epoch}, Erro: {loss}")
+                epochs_list.append(epoch)
+                loss_list.append(loss)
+                
+        # Ao final do treinamento, plota o gráfico de convergência
+        self.plot_convergence(epochs_list, loss_list)
 
     def predict(self, X):
         y_pred = []
@@ -68,6 +79,23 @@ class NeuralNetwork:
             y_pred.append(activations[-1])
         return np.array(y_pred)
 
+    def plot_convergence(self, epochs, losses):
+        """
+        Gera um gráfico da evolução do erro (loss) ao longo das épocas.
+        
+        Parâmetros:
+         - epochs: lista com os valores das épocas em que o erro foi registrado.
+         - losses: lista com os valores do erro correspondente a cada época.
+        """
+        plt.figure(figsize=(8, 5))
+        plt.plot(epochs, losses, marker='o', linestyle='-', color='b')
+        plt.title("Convergência do Erro Durante o Treinamento")
+        plt.xlabel("Épocas")
+        plt.ylabel("Erro Médio Quadrático")
+        plt.grid(True)
+        plt.savefig("convergence_plot.png")  # Salva o gráfico em um arquivo
+        plt.show()
+        
 # Exemplo de uso
 if __name__ == "__main__":
     # Dados de entrada (função XOR)
